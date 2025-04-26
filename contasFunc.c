@@ -67,6 +67,19 @@ int gerarID() {
     return ++id;
 };
 
+void filePull(PConta conta) {
+    FILE *fptr;
+
+    fptr = fopen("contas.txt", "r"); 
+    if (fptr == NULL) {
+        printf("Erro ao abrir o arquivo.\n");
+        return;
+    }
+
+    fprintf(fptr, "%s, %d, %c, %.2f\n", conta->nomeUser, conta->numero, conta->tipo, conta->saldo);
+    fclose(fptr);
+}
+
 
 PConta criarConta() {
     PConta conta = alocarMemoriaConta();
@@ -84,6 +97,7 @@ PConta criarConta() {
 
     conta->saldo = 0.0;
     conta->numero = gerarID();
+    filePull(conta);
 
     printf("\nConta criada com sucesso!\n");
     printf("Número: %d\nTitular: %s\nSaldo: R$%.2f\nTipo: %c\n",
