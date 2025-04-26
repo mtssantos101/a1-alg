@@ -1,0 +1,2 @@
+Alice Monteiro, 1, B, 2000
+Bruno Ferreira, 2, A, 100

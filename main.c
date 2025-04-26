@@ -1,8 +1,23 @@
 #include "conta.h"
 
+void limparTela(){
+    #ifdef _WIN32
+        system("cls");
+    #else
+        system("clear");
+    #endif
+}
+
 int main(int argc, char *argv[]) {
     int opcao;
-    PConta minhaConta = NULL;
+    int quantidade = 0;
+    PPConta contas = filePush(&quantidade);
+
+    if (contas) {
+        printf("Número de contas carregadas: %d\n", quantidade);
+    } else {
+        printf("Nenhuma conta foi carregada.\n");
+    }
 
     printf("Seja bem-vindo ao Banco!\n");
 
@@ -17,22 +32,39 @@ int main(int argc, char *argv[]) {
 
         switch (opcao) {
             case 1:
-                minhaConta = criarConta();
+                limparTela();
+                if(!contas){
+                    contas = alocarMemoriaEstrutura();
+                    break;
+                }
+                contas[quantidade] = criarConta();
+                quantidade++;
+                printf("Número de contas: %d\n", quantidade);
                 break;
             case 2:
-                verConta(minhaConta);
+                limparTela();
+                if (!contas) {
+                    printf("\nNenhuma conta foi criada ainda.\n");
+                    break;
+                }   
+                verConta(contas, &quantidade);
                 break;
             case 0:
+                limparTela();
                 printf("\nSaindo...\n");
                 break;
             default:
+                limparTela();
                 printf("\nOpção inválida.\n");
         }
 
     } while (opcao != 0);
 
-    if (minhaConta != NULL) {
-        free(minhaConta);
+    if (contas != NULL) {
+        for(int i = 0; i <= quantidade-1; i++){
+            free(contas[i]);
+        }
+        free(contas);
     }
 
     return 0;
