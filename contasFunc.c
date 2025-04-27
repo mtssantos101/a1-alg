@@ -4,7 +4,7 @@
 PConta alocarMemoriaConta(){
     PConta conta = (PConta) malloc(sizeof(Conta));
     if (!conta) {
-        printf("Memória cheia.\n");
+        printf("Memoria cheia.\n");
         exit(1);
     }
     return conta;
@@ -13,7 +13,7 @@ PConta alocarMemoriaConta(){
 PPConta alocarMemoriaEstrutura(){
     PPConta contas = (PPConta) malloc(CAPACIDADE * sizeof(PConta));
     if (!contas) {
-        printf("Erro ao alocar memória para o vetor de contas\n");
+        printf("Erro ao alocar memoria para o vetor de contas\n");
         exit(1);
     }
     return contas;
@@ -22,7 +22,7 @@ PPConta alocarMemoriaEstrutura(){
 void realocarEstrutura(PPConta contas, int* capacidade){
     contas = (PPConta) realloc(contas, *capacidade * sizeof(PConta));
        if (!contas) {
-           printf("Erro ao realocar memória para o vetor de contas\n");
+           printf("Erro ao realocar memoria para o vetor de contas\n");
            exit(1);
        }
 }
@@ -50,7 +50,7 @@ PPConta filePush(int* quantidade) {
 
         PConta conta = alocarMemoriaConta();
         
-        if (sscanf(linha, " %[^\n,], %d, %c, %f", conta->nomeUser, &conta->numero, &conta->tipo, &conta->saldo) == 4) {
+        if (sscanf(linha, "%[^\n,], %d, %c, %f", conta->nomeUser, &conta->numero, &conta->tipo, &conta->saldo) == 4) {
             contas[i++] = conta;
         } else {
             free(conta); 
@@ -70,13 +70,13 @@ int gerarID() {
 void filePull(PConta conta) {
     FILE *fptr;
 
-    fptr = fopen("contas.txt", "r"); 
+    fptr = fopen("contas.txt", "a"); 
     if (fptr == NULL) {
         printf("Erro ao abrir o arquivo.\n");
         return;
     }
 
-    fprintf(fptr, "%s, %d, %c, %.2f\n", conta->nomeUser, conta->numero, conta->tipo, conta->saldo);
+    fprintf(fptr, "\n%s, %d, %c, %.2f\n", conta->nomeUser, conta->numero, conta->tipo, conta->saldo);
     fclose(fptr);
 }
 
@@ -91,7 +91,7 @@ PConta criarConta() {
     conta->nomeUser[strcspn(conta->nomeUser, "\n")] = '\0';
 
     printf("\nEscolha seu tipo de conta: ");
-    printf("\n A - Conta corrente (Digite A)\n B - Conta salário (Digite B)\n");
+    printf("\n A - Conta corrente (Digite A)\n B - Conta salario (Digite B)\n");
     scanf(" %c", &conta->tipo); 
     getchar();
 
@@ -100,7 +100,7 @@ PConta criarConta() {
     filePull(conta);
 
     printf("\nConta criada com sucesso!\n");
-    printf("Número: %d\nTitular: %s\nSaldo: R$%.2f\nTipo: %c\n",
+    printf("Numero: %d\nTitular: %s\nSaldo: R$%.2f\nTipo: %c\n",
            conta->numero, conta->nomeUser, conta->saldo, conta->tipo);
 
     return conta;
@@ -111,7 +111,7 @@ void verConta(PPConta contas, int * quantidade) {
     for(int i = 0; i <= *quantidade-1; i++){
         printf("\n**** Dados da Conta ****\n");
         printf("Titular: %s\n", contas[i]->nomeUser);
-        printf("Número: %d\n", contas[i]->numero);
+        printf("Numero: %d\n", contas[i]->numero);
         printf("Saldo: R$%.2f\n", contas[i]->saldo);
         printf("Tipo: %c\n", contas[i]->tipo);
     }

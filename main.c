@@ -14,7 +14,7 @@ int main(int argc, char *argv[]) {
     PPConta contas = filePush(&quantidade);
 
     if (contas) {
-        printf("Número de contas carregadas: %d\n", quantidade);
+        printf("Numero de contas carregadas: %d\n", quantidade);
     } else {
         printf("Nenhuma conta foi carregada.\n");
     }
@@ -26,7 +26,7 @@ int main(int argc, char *argv[]) {
         printf("1 - Criar conta\n");
         printf("2 - Ver dados da conta\n");
         printf("0 - Sair\n");
-        printf("Escolha uma opção: ");
+        printf("Escolha uma opcao: ");
         scanf("%d", &opcao);
         getchar();
 
@@ -39,7 +39,7 @@ int main(int argc, char *argv[]) {
                 }
                 contas[quantidade] = criarConta();
                 quantidade++;
-                printf("Número de contas: %d\n", quantidade);
+                printf("Numero de contas: %d\n", quantidade);
                 break;
             case 2:
                 limparTela();
@@ -55,7 +55,7 @@ int main(int argc, char *argv[]) {
                 break;
             default:
                 limparTela();
-                printf("\nOpção inválida.\n");
+                printf("\nOpçao invalida.\n");
         }
 
     } while (opcao != 0);
