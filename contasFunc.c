@@ -1,6 +1,36 @@
 #include "conta.h"
 #define CAPACIDADE 5
 
+void atualizarID(int novoID) {
+    FILE *fptr = fopen("config.txt", "w");
+
+    if (fptr == NULL) {
+        printf("Erro ao abrir o arquivo de ID.\n");
+        exit(1);
+    }
+
+    fprintf(fptr, "id=%d", novoID);
+    fclose(fptr);
+}
+
+int gerarID() {
+    FILE *fptr;
+    int id = 1; 
+
+    fptr = fopen("config.txt", "r");
+
+    if (fptr == NULL) {
+        atualizarID(id+1);
+        return id;
+    }
+
+    fscanf(fptr, "id=%d", &id);
+    fclose(fptr);
+    atualizarID(id + 1);
+
+    return id;
+};
+
 PConta alocarMemoriaConta(){
     PConta conta = (PConta) malloc(sizeof(Conta));
     if (!conta) {
@@ -62,11 +92,6 @@ PPConta filePush(int* quantidade) {
     return contas;
 }
 
-int gerarID() {
-    static int id = 0;
-    return ++id;
-};
-
 void filePull(PConta conta) {
     FILE *fptr;
 
@@ -76,7 +101,7 @@ void filePull(PConta conta) {
         return;
     }
 
-    fprintf(fptr, "\n%s, %d, %c, %.2f\n", conta->nomeUser, conta->numero, conta->tipo, conta->saldo);
+    fprintf(fptr, "%s, %d, %c, %.2f\n", conta->nomeUser, conta->numero, conta->tipo, conta->saldo);
     fclose(fptr);
 }
 

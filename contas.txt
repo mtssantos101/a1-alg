@@ -1,3 +1,1 @@
-Alice Monteiro, 1, B, 2000
-Bruno Ferreira, 2, A, 100
-Maria, 1, A, 0.00
+
