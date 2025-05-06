@@ -1,4 +1,5 @@
 #include "conta.h"
+#include "lancamentos.h"
 
 void limparTela(){
     #ifdef _WIN32
@@ -25,6 +26,9 @@ int main(int argc, char *argv[]) {
         printf("\n**** Menu ****\n");
         printf("1 - Criar conta\n");
         printf("2 - Ver dados da conta\n");
+        printf("3 - Fazer lançamento\n");
+        printf("4 - Ver lançamentos\n");
+        printf("5 - Excluir lançamento\n");
         printf("0 - Sair\n");
         printf("Escolha uma opcao: ");
         scanf("%d", &opcao);
@@ -48,6 +52,15 @@ int main(int argc, char *argv[]) {
                     break;
                 }   
                 verConta(contas, &quantidade);
+                break;
+            case 3:
+                fazerLancamento();
+                break;
+            case 4:
+                listarLancamentos();
+                break;
+            case 5:
+                excluirLancamento();
                 break;
             case 0:
                 limparTela();
