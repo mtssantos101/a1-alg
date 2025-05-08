@@ -1,3 +1,3 @@
 #include "conta.h"
 
-void menu();
+void menuPrincipal();

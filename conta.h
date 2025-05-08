@@ -12,7 +12,9 @@ typedef struct conta {
 
 PPConta filePush(int *quantidade);
 PConta criarConta();
-void verConta(PPConta conta, int *quantidade);
+void verConta(PConta conta);
 PPConta alocarMemoriaEstrutura();
 void limparTela();
 void menu();
+PConta acessarConta(PPConta contas, int *quantidade);
+void verContas(PPConta contas, int quantidade);
