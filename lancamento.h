@@ -12,5 +12,6 @@ typedef struct Lancamento{
 }Lancamento, PLancamento;
 
 Lancamento criaLancamento();
+int atualizarSaldoConta(int idConta, float valorLancamento, char tipo);
 int removerLancamentosPorData(const char *dataRemover);
 void listaLancamentosOrdenado();
