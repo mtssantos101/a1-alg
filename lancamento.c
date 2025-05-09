@@ -29,7 +29,7 @@ int gerarIDLancamento() {
     return id;
 }
 
-Lancamento criaLancamento(){
+Lancamento criaLancamento(PConta conta) {
     Lancamento l;
 
     FILE *f = fopen("lancamento.txt", "a");
@@ -38,13 +38,9 @@ Lancamento criaLancamento(){
         exit(1);
     }
 
-    printf("**** Criar Lançamento ****\n");
+    printf("**** Criar Lancamento ****\n");
 
     l.id = gerarIDLancamento();
-
-    printf("\nDigite o id da conta: ");
-    scanf("%d", &l.id_conta);
-    getchar();
 
     printf("Data (AAAA-MM-DD): ");
     fgets(l.data, sizeof(l.data), stdin);
@@ -53,12 +49,19 @@ Lancamento criaLancamento(){
     printf("Valor: ");
     scanf("%f", &l.valor);
     getchar();
-
-    printf("tipo de conta (D para débito e C para crédito): ");
-    scanf("%c", &l.tipo);
+    
+    printf("Digite '1' para Deposito ou '2' para Pagar: ");
+    scanf("%i", &l.acao);
     getchar();
+    if(l.acao == 1){
+        l.tipo = 'D'; // Deposito
+    }else{
+        printf("tipo de conta (D para debito e C para credito): ");
+        scanf("%c", &l.tipo);
+        getchar(); //Pagar
+    }
 
-    printf("pagamento será feito agora ou no futuro? 0 para futuro e 1 para agora");
+    printf("A acao sera feito agora ou no futuro? 0 para futuro e 1 para agora: ");
     scanf("%d", &l.efetivado);
     getchar();
 
@@ -66,8 +69,9 @@ Lancamento criaLancamento(){
     if(l.efetivado == 1)
         atualizarSaldoConta(l.id_conta, l.valor, l.tipo);
 
-    fprintf(f,"%d;%d;%s;%.2f;%c;%d\n",
-        l.id, l.id_conta, l.data, l.valor, l.tipo, l.efetivado);
+
+    fprintf(f,"%d;%d;%s;%.2f;%d;%c;%d\n",
+        l.id, conta->id, l.data, l.valor, l.acao, l.tipo, l.efetivado);
     
     
     fclose(f); 
@@ -75,7 +79,8 @@ Lancamento criaLancamento(){
     return l; 
 }
 
-int atualizarSaldoConta(int idConta, float valorLancamento, char tipo) {
+int atualizarSaldoConta(void *conta, float valorLancamento, int acao) {
+    Conta *contaReal = (Conta *)conta; 
     char* nomeArquivo = "contas.txt";
     char* nomeArquivoTemp = "conta_temp.txt";
 
@@ -123,6 +128,7 @@ int atualizarSaldoConta(int idConta, float valorLancamento, char tipo) {
         fprintf(temp, "Saldo: R$%.2f\n", saldo);
         fprintf(temp, "Tipo: %c\n", tipoConta);
         fprintf(temp, "-----------------------------\n");
+
     }
 
     fclose(arquivo);
@@ -175,6 +181,7 @@ int removerLancamentosPorData(char *dataRemover) {
             } else {
                 encontrou = 1; 
             }
+
         } else {
             printf("Linha mal formatada ignorada: %s\n", linha);
         }
@@ -222,7 +229,7 @@ void quickSort(Lancamento vetor[], int esquerda, int direita) {
     if (i < direita)
         quickSort(vetor, i, direita);
 }
-void listaLancamentosOrdenado(){
+void listaLancamentosOrdenado(int contaId) {
     FILE *arquivo = fopen("lancamento.txt", "r");
     if (arquivo == NULL) {
         printf("Erro ao abrir arquivo!\n");
@@ -237,13 +244,14 @@ void listaLancamentosOrdenado(){
         exit(1);
     }
     
-    while (fscanf(arquivo, "%d;%d;%10[^;];%f;%c;%d\n", 
+    while (fscanf(arquivo, "%d;%d;%10[^;];%f;%d;%c;%d\n", 
         &lancamentos[qtd].id, 
         &lancamentos[qtd].id_conta, 
         lancamentos[qtd].data, 
         &lancamentos[qtd].valor, 
+        &lancamentos[qtd].acao,
         &lancamentos[qtd].tipo, 
-        &lancamentos[qtd].efetivado) == 6) {
+        &lancamentos[qtd].efetivado) == 7) {
         qtd++;
         if (qtd >= capacidade) {
             capacidade *= 2;
@@ -259,15 +267,21 @@ void listaLancamentosOrdenado(){
 
     // Ordenar os lançamentos por data
     quickSort(lancamentos, 0, qtd - 1);
-
+    if(lancamentos == NULL){
+        printf("Nenhum lancamento encontrado.\n");
+        return;
+    }
     for (int i = 0; i < qtd; i++) {
-        printf("%2d | %5d | %s | %8.2f |  %c   |    %s\n", 
-               lancamentos[i].id, 
-               lancamentos[i].id_conta, 
-               lancamentos[i].data, 
-               lancamentos[i].valor, 
-               lancamentos[i].tipo, 
-               lancamentos[i].efetivado ? "Sim" : "Nao");
+         if (lancamentos[i].id_conta == contaId) {
+            printf("%2d | %5d | %s | %8.2f | %d |  %c   |    %s\n", 
+                   lancamentos[i].id, 
+                   lancamentos[i].id_conta, 
+                   lancamentos[i].data, 
+                   lancamentos[i].valor, 
+                   lancamentos[i].acao, 
+                   lancamentos[i].tipo, 
+                   lancamentos[i].efetivado ? "Sim" : "Nao");
+         }
     }
 
     free(lancamentos);

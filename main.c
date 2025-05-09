@@ -1,6 +1,6 @@
 #include "menu.h"
 
 int main(int argc, char *argv[]) {
-    menu();
+    menuPrincipal();
     return 0;
 }
