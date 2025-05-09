@@ -59,11 +59,11 @@ PPConta realocarEstrutura(PPConta contas, int* capacidade){
 PPConta filePush(int* quantidade) {
     FILE *fptr = fopen("contas.txt", "r");
     char linha[200];
-    int i = 0;  
+    int capacidade = CAPACIDADE_INICIAL;
+    int i = 0;
 
-    PPConta contas = alocarMemoriaEstrutura();
+    PPConta contas = alocarMemoriaEstrutura(); 
 
-    
     if (fptr == NULL) {
         printf("Erro ao abrir o arquivo\n");
         free(contas);
@@ -72,17 +72,19 @@ PPConta filePush(int* quantidade) {
     }
 
     while (fgets(linha, sizeof(linha), fptr)) {
-        if (i == CAPACIDADE_INICIAL) {
-            int newCapacidade = i*2;
-            contas = realocarEstrutura(contas, &newCapacidade);
+        if (i >= capacidade) {
+            capacidade *= 2;
+            contas = realocarEstrutura(contas, &capacidade);
         }
 
         PConta conta = alocarMemoriaConta();
         
-        if (sscanf(linha, "%[^\n,], %d, %c, %f", conta->nomeUser, &conta->id, &conta->tipo, &conta->saldo) == 4) {
+        int r = sscanf(linha, " %d, %[^,], %f, %c", &conta->id, conta->nomeUser, &conta->saldo, &conta->tipo);
+        if (r == 4) {
             contas[i++] = conta;
         } else {
-            free(conta); 
+            printf("Erro ao ler a linha: %s", linha);
+            free(conta);
         }
     }
 
@@ -99,10 +101,9 @@ void filePull(PConta conta) {
         return;
     }
 
-    fprintf(fptr, "id: %d\nTitular: %s\nSaldo: R$%.2f\nTipo: %c\n",
+    fprintf(fptr, "%d, %s,%.2f,%c\n",
         conta->id, conta->nomeUser, conta->saldo, conta->tipo);
     
-    fprintf(fptr, "-----------------------------\n");
         
     fclose(fptr);
 }
@@ -133,20 +134,27 @@ PConta criarConta() {
     return conta;
 }
 
-void verConta(PPConta contas, int * quantidade) {
-    if (quantidade == 0) {
-        printf("\nNenhuma conta cadastrada.\n");
-        return;
-    }
+void verConta(PConta conta) {
+    printf("\n**** Dados da Conta ****\n");
+    printf("Titular: %s\n", conta->nomeUser);
+    printf("Numero: %d\n", conta->id);
+    printf("Saldo: R$%.2f\n", conta->saldo);
+    printf("Tipo: %c\n", conta->tipo);
 
-    for(int i = 0; i <= *quantidade-1; i++){
-        printf("\n**** Dados da Conta ****\n");
+}
+
+void verContas(PPConta contas, int quantidade) {
+    printf("\n**** Lista de Contas ****\n");
+    for (int i = 0; i < quantidade; i++) {
+        printf("Conta %d:\n", i + 1);
         printf("Titular: %s\n", contas[i]->nomeUser);
         printf("Numero: %d\n", contas[i]->id);
         printf("Saldo: R$%.2f\n", contas[i]->saldo);
         printf("Tipo: %c\n", contas[i]->tipo);
+        printf("-----------------------------\n");
     }
-
+    printf("Total de contas: %d\n", quantidade);
+    printf("-----------------------------\n");
 }
 
 void limparTela(){
@@ -155,4 +163,20 @@ void limparTela(){
     #else
         system("clear");
     #endif
+}
+
+PConta acessarConta(PPConta contas, int *quantidade) {
+    int num;
+    printf("Digite o Numero da conta que deseja acessar: ");
+    scanf("%d", &num);
+    getchar();
+
+    for (int i = 0; i < *quantidade; i++) {
+        if (contas[i]->id == num) {
+            printf("Acesso a conta %d permitido.\n", num);
+            return contas[i];
+        }
+    }
+
+    return NULL;
 }
