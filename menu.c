@@ -51,8 +51,8 @@ void menu(){
                 break;
             case 4:
                 limparTela();
-                char* data;
-                printf("digite a data do lancamento para ser removida");
+                char data[11];
+                printf("digite a data do lancamento para ser removida: ");
                 scanf("%s", data);
                 removerLancamentosPorData(data);
                 break;
