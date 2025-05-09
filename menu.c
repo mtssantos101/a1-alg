@@ -25,7 +25,7 @@ void menuSub(PConta contaAtiva){
                 break;
             case 2:
                 limparTela();
-                criaLancamento();
+                criaLancamento(contaAtiva);
                 break;
             case 3:
                 limparTela();
@@ -36,8 +36,8 @@ void menuSub(PConta contaAtiva){
                 break;
             case 4:
                 limparTela();
-                printf("lançamentos ordenados: \n");
-                listaLancamentosOrdenado();
+                printf("lancamentos ordenados: \n");
+                listaLancamentosOrdenado(contaAtiva->id);
                 break;
             case 0:
                 limparTela();
@@ -83,7 +83,7 @@ void menuPrincipal(){
                     printf("Conta ativa: %s\n", contaAtiva->nomeUser);
                     menuSub(contaAtiva);
                 } else {
-                    printf("Conta não encontrada.\n");
+                    printf("Conta nao encontrada.\n");
                 }
                 break;
             case 2:
