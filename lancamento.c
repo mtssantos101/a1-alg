@@ -67,7 +67,8 @@ Lancamento criaLancamento(PConta conta) {
 
     //efetua o débito ou crédito caso a opção seja para efetuar agora
     if(l.efetivado == 1)
-        atualizarSaldoConta(conta, l.valor, l.acao);
+        atualizarSaldoConta(l.id_conta, l.valor, l.tipo);
+
 
     fprintf(f,"%d;%d;%s;%.2f;%d;%c;%d\n",
         l.id, conta->id, l.data, l.valor, l.acao, l.tipo, l.efetivado);
@@ -81,9 +82,10 @@ Lancamento criaLancamento(PConta conta) {
 int atualizarSaldoConta(void *conta, float valorLancamento, int acao) {
     Conta *contaReal = (Conta *)conta; 
     char* nomeArquivo = "contas.txt";
+    char* nomeArquivoTemp = "conta_temp.txt";
 
     FILE* arquivo = fopen(nomeArquivo, "r");
-    FILE* temp = fopen("conta_temp.txt", "w");
+    FILE* temp = fopen(nomeArquivoTemp, "w");
 
     if (arquivo == NULL || temp == NULL) {
         printf("Erro ao abrir arquivos.\n");
@@ -94,79 +96,111 @@ int atualizarSaldoConta(void *conta, float valorLancamento, int acao) {
     int encontrou = 0;
 
     while (fgets(linha, sizeof(linha), arquivo) != NULL) {
-        Conta contaAtual;
+        int id;
+        char nome[100], tipoConta;
+        float saldo;
 
-        linha[strcspn(linha, "\n")] = '\0';
+        if (sscanf(linha, "id: %d", &id) != 1) continue;
 
-        sscanf(linha, "%d,%99[^,],%f, %c",
-               &contaAtual.id,
-               contaAtual.nomeUser,
-               &contaAtual.saldo,
-               &contaAtual.tipo);
+        if (fgets(linha, sizeof(linha), arquivo) == NULL) break;
+        sscanf(linha, "Titular: %99[^\n]", nome);
 
-            if (contaAtual.id == contaReal->id) {
-            if (acao == 1) { 
-                contaAtual.saldo += valorLancamento; 
-                contaReal->saldo += valorLancamento; 
-            } else if (acao == 2 ) {
-                contaAtual.saldo -= valorLancamento;  
-                contaReal->saldo -= valorLancamento;
-            }
+        if (fgets(linha, sizeof(linha), arquivo) == NULL) break;
+        sscanf(linha, "Saldo: R$%f", &saldo);
+
+        if (fgets(linha, sizeof(linha), arquivo) == NULL) break;
+        sscanf(linha, "Tipo: %c", &tipoConta);
+
+        fgets(linha, sizeof(linha), arquivo);
+
+        if (id == idConta) {
             encontrou = 1;
+            if (tipo == 'D' || tipo == 'd') { 
+                saldo -= valorLancamento; 
+            } else if (tipo == 'C' || tipo == 'c') {
+                saldo += valorLancamento;  
+            } 
+            printf("Saldo atualizado com sucesso para conta ID %d.\n", idConta);
         }
 
-        fprintf(temp, "%d,%s,%.2f,%c\n",
-                contaAtual.id,
-                contaAtual.nomeUser,
-                contaAtual.saldo, 
-                contaAtual.tipo);
+        fprintf(temp, "id: %d\n", id);
+        fprintf(temp, "Titular: %s\n", nome);
+        fprintf(temp, "Saldo: R$%.2f\n", saldo);
+        fprintf(temp, "Tipo: %c\n", tipoConta);
+        fprintf(temp, "-----------------------------\n");
+
     }
 
     fclose(arquivo);
     fclose(temp);
 
-    //remove(nomeArquivo);
-    remove(nomeArquivo);
-    rename("conta_temp.txt", nomeArquivo);
+    if (!encontrou) {
+        printf("Conta com id %d não encontrada.\n", idConta);
+        remove(nomeArquivoTemp);
+        return 0; 
+    }
 
-    return encontrou; // retorna 1 se atualizou com sucesso, 0 se não achou o ID
+    if (remove(nomeArquivo) != 0) {
+        printf("Erro ao remover arquivo original.\n");
+        return 0;
+    }
+    if (rename(nomeArquivoTemp, nomeArquivo) != 0) {
+        printf("Erro ao renomear arquivo temporário.\n");
+        return 0;
+    }
+
+    return 1;   
 }
 
-int removerLancamentosPorData(const char *dataRemover) {
-    char* nomeArquivo = "lancamento.txt";
-    FILE *arquivoOriginal = fopen(nomeArquivo, "r");
+int removerLancamentosPorData(char *dataRemover) {
+    FILE *arquivoOriginal = fopen("lancamento.txt", "r");
     FILE *arquivoTemp = fopen("lancamento_temp.txt", "w");
-    
-    if (arquivoOriginal == NULL || arquivoTemp == NULL) {
+
+    if (!arquivoOriginal || !arquivoTemp) {
         printf("Erro ao abrir arquivos!\n");
-        return 0; // falha
+        if (arquivoOriginal) fclose(arquivoOriginal);
+        if (arquivoTemp) fclose(arquivoTemp);
+        return 0;
     }
 
     Lancamento l;
+    char linha[256];
     int encontrou = 0;
 
-    while (fscanf(arquivoOriginal, "%d;%d;%10[^;];%f;%d;%c;%d\n", 
-                  &l.id, &l.id_conta, l.data, &l.valor,&l.acao, &l.tipo, &l.efetivado) == 7) {
-        
-        if (strcmp(l.data, dataRemover) != 0) {
-            // Copia lançamento para temporário, pois não é a data para remover
-            fprintf(arquivoTemp, "%d;%d;%s;%.2f;%d;%c;%d\n", 
-                    l.id, l.id_conta, l.data, l.valor,l.acao, l.tipo, l.efetivado);
+    while (fgets(linha, sizeof(linha), arquivoOriginal)) {
+        linha[strcspn(linha, "\n")] = '\0';
+
+        int camposLidos = sscanf(linha, "%d;%d;%10[^;];%f;%c;%d",
+                                 &l.id, &l.id_conta, l.data, &l.valor, &l.tipo, &l.efetivado);
+
+        if (camposLidos == 6) {
+            l.data[10] = '\0'; 
+            if (strcmp(l.data, dataRemover) != 0) {
+                fprintf(arquivoTemp, "%d;%d;%s;%.2f;%c;%d\n",
+                        l.id, l.id_conta, l.data, l.valor, l.tipo, l.efetivado);
+            } else {
+                encontrou = 1; 
+            }
+
         } else {
-            encontrou = 1; // encontrou ao menos um lançamento com data a remover
+            printf("Linha mal formatada ignorada: %s\n", linha);
         }
     }
 
     fclose(arquivoOriginal);
     fclose(arquivoTemp);
 
-    // Substitui arquivo original pelo temporário
-    remove(nomeArquivo);
-    rename("lancamento_temp.txt", nomeArquivo);
+    if (encontrou) {
+        remove("lancamento.txt");
+        rename("lancamento_temp.txt", "lancamento.txt");
+        printf("Lançamento(s) na data %s removido(s) com sucesso.\n", dataRemover);
+    } else {
+        remove("lancamento_temp.txt");
+        printf("Nenhum lançamento encontrado para a data %s.\n", dataRemover);
+    }
 
-    return encontrou; 
+    return encontrou;
 }
-
 void trocar(Lancamento *a, Lancamento *b) {
     Lancamento temp = *a;
     *a = *b;

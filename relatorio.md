@@ -1,3 +1,3 @@
 # Sistema de gerenciamento de conta
 
-### algoritmo usado: bubble sort 
+### algoritmo usado: quick sort

@@ -99,8 +99,25 @@ void menuPrincipal(){
                 if(contas == NULL){
                     printf("Nenhuma conta foi criada ainda.\n");
                     break;
-                }
-                menuSub(contaAtiva);
+                }   
+                verConta(contas, &quantidade);
+                break;
+            case 3:
+                limparTela();
+                criaLancamento();
+                break;
+            case 4:
+                limparTela();
+                char data[11];
+                printf("digite a data do lancamento para ser removida: ");
+                scanf("%s", data);
+                removerLancamentosPorData(data);
+                break;
+            case 5:
+                limparTela();
+                printf("lançamentos ordenados: \n");
+                listaLancamentosOrdenado();
+
                 break;
             case 0:
                 limparTela();

@@ -57,7 +57,7 @@ PPConta realocarEstrutura(PPConta contas, int* capacidade){
 }
 
 PPConta filePush(int* quantidade) {
-    FILE *fptr = fopen("contas.txt", "r");
+    FILE *fptr = fopen("contas.txt", "a+");
     char linha[200];
     int capacidade = CAPACIDADE_INICIAL;
     int i = 0;
