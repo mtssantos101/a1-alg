@@ -30,8 +30,8 @@ void menuSub(PConta contaAtiva){
             case 3:
                 limparTela();
                 char* data;
-                printf("digite a data do lancamento para ser removida");
-                scanf("%s", data);
+                printf("Digite a data do lancamento para ser removida (YYYY-MM-DD): ");
+                scanf("%10s", data);
                 removerLancamentosPorData(data);
                 break;
             case 4:
