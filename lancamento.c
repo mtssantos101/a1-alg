@@ -41,6 +41,7 @@ Lancamento criaLancamento(PConta conta) {
     printf("**** Criar Lancamento ****\n");
 
     l.id = gerarIDLancamento();
+    l.id_conta = conta->id;
 
     printf("Data (AAAA-MM-DD): ");
     fgets(l.data, sizeof(l.data), stdin);
@@ -79,8 +80,7 @@ Lancamento criaLancamento(PConta conta) {
     return l; 
 }
 
-int atualizarSaldoConta(void *conta, float valorLancamento, int acao) {
-    Conta *contaReal = (Conta *)conta; 
+int atualizarSaldoConta(int idConta, float valorLancamento, char tipo) {
     char* nomeArquivo = "contas.txt";
     char* nomeArquivoTemp = "conta_temp.txt";
 
@@ -89,7 +89,7 @@ int atualizarSaldoConta(void *conta, float valorLancamento, int acao) {
 
     if (arquivo == NULL || temp == NULL) {
         printf("Erro ao abrir arquivos.\n");
-        return 0; // falha
+        return 0; 
     }
 
     char linha[256];
@@ -100,18 +100,12 @@ int atualizarSaldoConta(void *conta, float valorLancamento, int acao) {
         char nome[100], tipoConta;
         float saldo;
 
-        if (sscanf(linha, "id: %d", &id) != 1) continue;
+        linha[strcspn(linha, "\n")] = '\0';
 
-        if (fgets(linha, sizeof(linha), arquivo) == NULL) break;
-        sscanf(linha, "Titular: %99[^\n]", nome);
-
-        if (fgets(linha, sizeof(linha), arquivo) == NULL) break;
-        sscanf(linha, "Saldo: R$%f", &saldo);
-
-        if (fgets(linha, sizeof(linha), arquivo) == NULL) break;
-        sscanf(linha, "Tipo: %c", &tipoConta);
-
-        fgets(linha, sizeof(linha), arquivo);
+        if (sscanf(linha, "%d, %99[^,],%f,%c", &id, nome, &saldo, &tipoConta) != 4) {
+            printf("Linha com formato incorreto: %s\n", linha);
+            continue; 
+        }
 
         if (id == idConta) {
             encontrou = 1;
@@ -123,12 +117,7 @@ int atualizarSaldoConta(void *conta, float valorLancamento, int acao) {
             printf("Saldo atualizado com sucesso para conta ID %d.\n", idConta);
         }
 
-        fprintf(temp, "id: %d\n", id);
-        fprintf(temp, "Titular: %s\n", nome);
-        fprintf(temp, "Saldo: R$%.2f\n", saldo);
-        fprintf(temp, "Tipo: %c\n", tipoConta);
-        fprintf(temp, "-----------------------------\n");
-
+        fprintf(temp, "%d,%s,%.2f,%c\n", id, nome, saldo, tipoConta);
     }
 
     fclose(arquivo);
@@ -170,8 +159,8 @@ int removerLancamentosPorData(char *dataRemover) {
     while (fgets(linha, sizeof(linha), arquivoOriginal)) {
         linha[strcspn(linha, "\n")] = '\0';
 
-        int camposLidos = sscanf(linha, "%d;%d;%10[^;];%f;%c;%d",
-                                 &l.id, &l.id_conta, l.data, &l.valor, &l.tipo, &l.efetivado);
+        int camposLidos = sscanf(linha, "%d;%d;%10[^;];%f;%*[^;];%c;%d",
+            &l.id, &l.id_conta, l.data, &l.valor, &l.tipo, &l.efetivado);
 
         if (camposLidos == 6) {
             l.data[10] = '\0'; 
