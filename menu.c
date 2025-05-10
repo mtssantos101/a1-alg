@@ -29,7 +29,7 @@ void menuSub(PConta contaAtiva){
                 break;
             case 3:
                 limparTela();
-                char* data;
+                char data[11];
                 printf("Digite a data do lancamento para ser removida (YYYY-MM-DD): ");
                 scanf("%10s", data);
                 removerLancamentosPorData(data);
@@ -90,34 +90,25 @@ void menuPrincipal(){
                 limparTela();
                 if(!contas){
                     contas = alocarMemoriaEstrutura();
-                    break;
+                    if (!contas) {
+                        printf("Falha ao alocar memória inicial para contas.\n");
+                        break;
+                    }
+                } else {
+                    PPConta aux = realloc(contas, (quantidade + 1) * sizeof(PConta));
+                    if (aux == NULL) {
+                        printf("Falha ao realocar memória para nova conta.\n");
+                        break;
+                    }
+                    contas = aux;
                 }
+            
                 contas[quantidade] = criarConta();
                 contaAtiva = contas[quantidade];
                 quantidade++;
-                printf("Numero de contas: %d\n", quantidade);
-                if(contas == NULL){
-                    printf("Nenhuma conta foi criada ainda.\n");
-                    break;
-                }   
-                verConta(contas, &quantidade);
-                break;
-            case 3:
-                limparTela();
-                criaLancamento();
-                break;
-            case 4:
-                limparTela();
-                char data[11];
-                printf("digite a data do lancamento para ser removida: ");
-                scanf("%s", data);
-                removerLancamentosPorData(data);
-                break;
-            case 5:
-                limparTela();
-                printf("lançamentos ordenados: \n");
-                listaLancamentosOrdenado();
-
+                printf("Número de contas: %d\n", quantidade);
+                verConta(contaAtiva);
+                menuSub(contaAtiva);
                 break;
             case 0:
                 limparTela();
